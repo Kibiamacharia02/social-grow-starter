@@ -1,0 +1,62 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: socialgrow
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build: ./backend
+    env_file: .env
+    command: celery -A app.tasks worker --loglevel=info
+    depends_on:
+      - backend
+      - redis
+      - db
+    volumes:
+      - ./backend:/app
+
+  beat:
+    build: ./backend
+    env_file: .env
+    command: celery -A app.tasks beat --loglevel=info
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/usr/src/app
+
+volumes:
+  db_data:
