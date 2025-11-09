@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Content Scheduler - {{ business.business_name }}</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Schedule New Post</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Platform</label>
+                            <select name="platform" class="form-control" required>
+                                <option value="tiktok">TikTok</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="twitter">Twitter</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="linkedin">LinkedIn</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea name="content" class="form-control" rows="4" required 
+                                      placeholder="Write your post content..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Schedule Time</label>
+                            <input type="datetime-local" name="scheduled_time" class="form-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">Schedule Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Scheduled Posts</h5>
+                </div>
+                <div class="card-body">
+                    {% if scheduled_posts %}
+                    <div class="list-group">
+                        {% for post in scheduled_posts %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <span class="badge bg-primary">{{ post.platform|title }}</span>
+                                    {{ post.content|truncate(50) }}
+                                </h6>
+                                <small class="text-muted">{{ post.scheduled_time.strftime('%b %d, %Y %I:%M %p') }}</small>
+                            </div>
+                            <p class="mb-1">{{ post.content }}</p>
+                            <small class="text-muted">Status: 
+                                <span class="badge bg-{{ 'success' if post.status == 'posted' else 'warning' }}">
+                                    {{ post.status|title }}
+                                </span>
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No posts scheduled yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
