@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Create New Business Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Business Name</label>
+                            <input type="text" name="business_name" class="form-control" required 
+                                   placeholder="e.g., iPhone Mobi Hub, Affordable Rides">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Industry</label>
+                            <select name="industry" class="form-control" required>
+                                <option value="">Select Industry</option>
+                                <option value="technology">Technology & Electronics</option>
+                                <option value="automotive">Automotive & Vehicles</option>
+                                <option value="fashion">Fashion & Apparel</option>
+                                <option value="food">Food & Restaurant</option>
+                                <option value="health">Health & Fitness</option>
+                                <option value="education">Education</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="real_estate">Real Estate</option>
+                                <option value="beauty">Beauty & Cosmetics</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Business Description</label>
+                            <textarea name="description" class="form-control" rows="3" 
+                                      placeholder="Describe your business..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Growth Goals</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="goals" value="followers">
+                                        <label class="form-check-label">Increase Followers</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="goals" value="engagement">
+                                        <label class="form-check-label">Boost Engagement</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="goals" value="sales">
+                                        <label class="form-check-label">Drive Sales</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="goals" value="brand_awareness">
+                                        <label class="form-check-label">Brand Awareness</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Business Profile</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
