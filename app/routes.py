@@ -1,16 +1,39 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_required, current_user
-from .models import db, BusinessProfile, SocialAccount, ContentStrategy, ScheduledPost
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required, current_user, login_user, logout_user
+from .models import db, User, BusinessProfile, SocialAccount, ContentStrategy, ScheduledPost
 from datetime import datetime
 import json
 
+bp = Blueprint('main', __name__)
+
+# Mock user for demo (remove when adding real authentication)
+class MockUser:
+    id = 1
+    is_authenticated = True
+    is_active = True
+    is_anonymous = False
+    
+    def get_id(self):
+        return str(self.id)
+
+# Simple login for demo
+@bp.route('/login')
+def login():
+    user = MockUser()
+    login_user(user)
+    flash('Logged in successfully!', 'success')
+    return redirect(url_for('main.dashboard'))
+
 # Dashboard - Show all businesses
+@bp.route('/')
+@bp.route('/dashboard')
 @login_required
 def dashboard():
     businesses = BusinessProfile.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', businesses=businesses)
 
 # Create new business profile
+@bp.route('/business/create', methods=['GET', 'POST'])
 @login_required
 def create_business():
     if request.method == 'POST':
@@ -30,11 +53,12 @@ def create_business():
         db.session.add(new_business)
         db.session.commit()
         flash('Business profile created successfully!', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('main.dashboard'))
     
     return render_template('create_business.html')
 
 # Business detail page
+@bp.route('/business/<int:business_id>')
 @login_required
 def business_detail(business_id):
     business = BusinessProfile.query.get_or_404(business_id)
@@ -42,18 +66,19 @@ def business_detail(business_id):
     # Ensure user owns this business
     if business.user_id != current_user.id:
         flash('Access denied.', 'error')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('main.dashboard'))
     
     return render_template('business_detail.html', business=business)
 
 # Content scheduler
+@bp.route('/business/<int:business_id>/scheduler', methods=['GET', 'POST'])
 @login_required
 def content_scheduler(business_id):
     business = BusinessProfile.query.get_or_404(business_id)
     
     if business.user_id != current_user.id:
         flash('Access denied.', 'error')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('main.dashboard'))
     
     if request.method == 'POST':
         platform = request.form['platform']
@@ -71,7 +96,7 @@ def content_scheduler(business_id):
         db.session.add(new_post)
         db.session.commit()
         flash('Post scheduled successfully!', 'success')
-        return redirect(url_for('content_scheduler', business_id=business_id))
+        return redirect(url_for('main.content_scheduler', business_id=business_id))
     
     # Get scheduled posts for this business
     scheduled_posts = ScheduledPost.query.filter_by(business_id=business_id).order_by(ScheduledPost.scheduled_time).all()
@@ -79,13 +104,14 @@ def content_scheduler(business_id):
     return render_template('content_scheduler.html', business=business, scheduled_posts=scheduled_posts)
 
 # Analytics dashboard
+@bp.route('/business/<int:business_id>/analytics')
 @login_required
 def analytics(business_id):
     business = BusinessProfile.query.get_or_404(business_id)
     
     if business.user_id != current_user.id:
         flash('Access denied.', 'error')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('main.dashboard'))
     
     # Mock analytics data (will be replaced with real data later)
     analytics_data = {
@@ -97,7 +123,8 @@ def analytics(business_id):
     
     return render_template('analytics.html', business=business, analytics=analytics_data)
 
-# API endpoint to get business stats (for AJAX calls)
+# API endpoint to get business stats
+@bp.route('/api/business/<int:business_id>/stats')
 @login_required
 def get_business_stats(business_id):
     business = BusinessProfile.query.get_or_404(business_id)
